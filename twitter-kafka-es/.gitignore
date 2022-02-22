@@ -177,4 +177,5 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,macos,git
 
-
+/src/main/java/dataEngineering/credentials/
+/.idea
