@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class Producer {
 
     private final static Logger logger = LoggerFactory.getLogger(Producer.class);
-    private final static String TOPIC_NAME = "test-elasticsearch-sink";
+    private final static String TOPIC_NAME = "stream_tweet";
     private final static String BOOTSTRAP_SERVERS = "localhost:9092";
 
     // use your own credentials - don't share them with anyone
