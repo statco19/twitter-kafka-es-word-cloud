@@ -36,38 +36,41 @@ public class StreamsFilter {
 
         // keep the messages that are truncated
         KStream<String, String> filterStream_truncated = streamTweet.filter(
-                (key, value) -> gson.fromJson(value, JsonElement.class)
-                        .getAsJsonObject()
-                        .get("truncated")
-                        .getAsString()
-                        .equals("true")
+                (key, value) -> extractFromTweet(gson, value,"truncated")
+                                .equals("true")
         );
 
         // keep the messages that are NOT truncated
         KStream<String, String> filteredStream_not_truncated = streamTweet.filter(
-                (key, value) -> gson.fromJson(value, JsonElement.class)
-                        .getAsJsonObject()
-                        .get("truncated")
-                        .getAsString()
-                        .equals("false")
+                (key, value) -> extractFromTweet(gson, value,"truncated")
+                                .equals("false")
         );
 
         // extract full text from truncated messages
         KStream<String, String> fromTruncated = filterStream_truncated.mapValues(
-                value -> gson.fromJson(value, JsonElement.class)
-                        .getAsJsonObject()
-                        .get("extended_tweet")
-                        .getAsJsonObject()
-                        .get("full_text")
-                        .getAsString()
+                value -> "{" + "\"created_at\":\""
+                        + extractFromTweet(gson, value,"created_at") + "\""
+                        + ",\"text\":\""
+                        + gson.fromJson(value, JsonElement.class)
+                                .getAsJsonObject()
+                                .get("extended_tweet")
+                                .getAsJsonObject()
+                                .get("full_text")
+                                .getAsString()
+                                .replace("\n", "\\n")
+                                .replace("\"", "")
+                        + "\"}"
         );
 
         // extract text from NOT truncated messages
         KStream<String, String> fromNotTruncated = filteredStream_not_truncated.mapValues(
-                value -> gson.fromJson(value, JsonElement.class)
-                        .getAsJsonObject()
-                        .get("text")
-                        .getAsString()
+                value -> "{" + "\"created_at\":\""
+                        + extractFromTweet(gson, value, "created_at") + "\""
+                        + ",\"text\":\""
+                        + extractFromTweet(gson, value, "text")
+                            .replace("\n", "\\n")
+                            .replace("\"", "")
+                        + "\"}"
         );
 
         // send the texts from both messages to a topic
@@ -77,5 +80,12 @@ public class StreamsFilter {
         // build a stream and start
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
+    }
+
+    private static String extractFromTweet(Gson gson, String value, String key) {
+        return gson.fromJson(value, JsonElement.class)
+                .getAsJsonObject()
+                .get(key)
+                .getAsString();
     }
 }

@@ -36,7 +36,7 @@ public class Producer {
 
     //    ArrayList<Long> followings = Lists.newArrayList(44196397L);  //elon musk
     ArrayList<Long> followings = Lists.newArrayList(TokenAndKey.MY_TWIITER_ID);
-    ArrayList<String> terms = Lists.newArrayList("spiderman");
+    ArrayList<String> terms = Lists.newArrayList("bitcoin");
 
     public Producer(){}
 
@@ -100,8 +100,8 @@ public class Producer {
         Hosts hosebirdHosts = new HttpHosts(Constants.STREAM_HOST);
         StatusesFilterEndpoint hosebirdEndpoint = new StatusesFilterEndpoint();
 
-//        hosebirdEndpoint.trackTerms(terms);  // track terms
-        hosebirdEndpoint.followings(followings);  // track users
+        hosebirdEndpoint.trackTerms(terms);  // track terms
+//        hosebirdEndpoint.followings(followings);  // track users
 
         // using OAuth1
         // be careful with secret keys
