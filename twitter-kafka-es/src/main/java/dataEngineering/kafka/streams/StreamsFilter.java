@@ -16,8 +16,7 @@ public class StreamsFilter {
     private static String APPLICATION_NAME = "streams-filter-application";
     private static String BOOTSTRAP_SERVERS = "localhost:9092";
     private static String STREAM_TWEET = "stream_tweet";
-    private static String STREAM_TWEET_NOT_TRUNCATED = "stream_tweet_not_truncated";
-    private static String STREAM_TWEET_TRUNCATED = "stream_tweet_truncated";
+    private static String STREAM_DESTINATION = "stream_tweet_destination";
 
     public static void main(String[] args) {
 
@@ -46,8 +45,24 @@ public class StreamsFilter {
                         .getAsString()
                         .equals("false")
         );
-        filteredStream_not_truncated.to(STREAM_TWEET_NOT_TRUNCATED);
-        filterStream_truncated.to(STREAM_TWEET_TRUNCATED);
+
+        KStream<String, String> fromTruncated = filterStream_truncated.mapValues(
+                value -> gson.fromJson(value, JsonElement.class)
+                        .getAsJsonObject()
+                        .get("extended_tweet")
+                        .getAsJsonObject()
+                        .get("full_text")
+                        .getAsString()
+        );
+        KStream<String, String> fromNotTruncated = filteredStream_not_truncated.mapValues(
+                value -> gson.fromJson(value, JsonElement.class)
+                        .getAsJsonObject()
+                        .get("text")
+                        .getAsString()
+        );
+
+        fromTruncated.to(STREAM_DESTINATION);
+        fromNotTruncated.to(STREAM_DESTINATION);
 
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
